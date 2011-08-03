@@ -271,7 +271,7 @@ public class RubyNKF {
             return pattern;
         }
         public String toString() {
-            return "[opt: " + opt 
+            return "[opt: " + opt
                 + " longOpt: " + longOpt
                 + " hasArg: " + hasArg
                 + " pattern: " + pattern.toString()
