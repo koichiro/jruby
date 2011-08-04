@@ -33,6 +33,19 @@ public class TestRubyNKF extends TestRubyBase {
         assertEquals("[[opt: null longOpt: unix hasArg: false pattern: null value: null]]", cmd.toString());
     }
 
+    public void testOptParseWithArg() throws Exception {
+        RubyNKF.CmdCommand cmd = RubyNKF.parseOption("-L");
+        assertEquals("[[opt: L longOpt: null hasArg: true pattern: [uwm] value: null]]", cmd.toString());
+        cmd = RubyNKF.parseOption("-Lu");
+        assertEquals("[[opt: L longOpt: null hasArg: true pattern: [uwm] value: u]]", cmd.toString());
+        cmd = RubyNKF.parseOption("-f60-");
+        assertEquals("[[opt: f longOpt: null hasArg: true pattern: [0-9]+-[0-9]* value: 60-]]", cmd.toString());
+        cmd = RubyNKF.parseOption("-f60-30");
+        assertEquals("[[opt: f longOpt: null hasArg: true pattern: [0-9]+-[0-9]* value: 60-30]]", cmd.toString());
+        cmd = RubyNKF.parseOption("-mB");
+        assertEquals("[[opt: m longOpt: null hasArg: true pattern: [BQN0] value: B]]", cmd.toString());
+    }
+
     public void testMultiShortOptParse() throws Exception {
         RubyNKF.CmdCommand cmd = RubyNKF.parseOption("-jSbw32");
         assertEquals("[[opt: j longOpt: jis hasArg: false pattern: null value: null], [opt: S longOpt: sjis-input hasArg: false pattern: null value: null], [opt: b longOpt: null hasArg: false pattern: null value: null], [opt: w longOpt: null hasArg: true pattern: [0-9][0-9] value: 32]]", cmd.toString());

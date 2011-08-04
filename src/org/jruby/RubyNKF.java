@@ -396,7 +396,13 @@ public class RubyNKF {
                     int max = s.length();
                     for (int j = 0; j < max; j++) {
                         if (opt.hasShortOption(s)) {
-                            cc.addOption(opt.matchShortOption(s));
+                            CmdOption cmd = opt.matchShortOption(s);
+                            if (cmd.getValue() != null) {
+                                int op_len = cmd.getValue().length();
+                                s = s.substring(op_len);
+                                j = j + op_len;
+                            }
+                            cc.addOption(cmd);
                         }
                         s = s.substring(1);
                     }
@@ -435,7 +441,7 @@ public class RubyNKF {
         options.addOption("h3", "katakana-hiragana");
         options.addOption("T");
         options.addOption("l");
-        options.addOption("f", null, "[0-9]+-");
+        options.addOption("f", null, "[0-9]+-[0-9]*");
         options.addOption("F");
         options.addOption("Z", null, "[0-3]");
         options.addOption("X");
