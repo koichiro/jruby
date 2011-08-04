@@ -238,11 +238,13 @@ public class RubyNKF {
         private String value = null;
         private Pattern pattern;
 
-        public CmdOption(String opt, String longOpt, boolean hasArg, String pattern) {
+        public CmdOption(String opt, String longOpt, String pattern) {
             this.opt = opt;
             this.longOpt = longOpt;
-            this.hasArg = hasArg;
-            this.pattern = Pattern.compile(pattern);
+            if (pattern != null) {
+                this.hasArg = true;
+                this.pattern = Pattern.compile(pattern);
+            }
         }
         String getOpt() { return opt; }
         String getLongOpt() { return longOpt; }
@@ -274,7 +276,7 @@ public class RubyNKF {
             return "[opt: " + opt
                 + " longOpt: " + longOpt
                 + " hasArg: " + hasArg
-                + " pattern: " + pattern.toString()
+                + " pattern: " + pattern
                 + " value: " + value + "]";
         }
     }
@@ -286,13 +288,10 @@ public class RubyNKF {
             return addOption(opt, null);
         }
         CmdOptions addOption(String opt, String longOpt) {
-            return addOption(opt, longOpt, false);
+            return addOption(opt, longOpt, null);
         }
-        CmdOptions addOption(String opt, String longOpt, boolean hasArg) {
-            return addOption(opt, longOpt, hasArg, "");
-        }
-        CmdOptions addOption(String opt, String longOpt, boolean hasArg, String pattern) {
-            return addOption(new CmdOption(opt, longOpt, hasArg, pattern));
+        CmdOptions addOption(String opt, String longOpt, String pattern) {
+            return addOption(new CmdOption(opt, longOpt, pattern));
         }
         CmdOptions addOption(CmdOption opt) {
             if (opt.hasLongOpt()) {
@@ -422,11 +421,11 @@ public class RubyNKF {
         options.addOption("j", "jis");
         options.addOption("s", "sjis");
         options.addOption("e", "euc");
-        options.addOption("w", null, true, "[0-9][0-9]");
+        options.addOption("w", null, "[0-9][0-9]");
         options.addOption("J", "jis-input");
         options.addOption("S", "sjis-input");
         options.addOption("E", "euc-input");
-        options.addOption("W", null, true, "[0-9][0-9]");
+        options.addOption("W", null, "[0-9][0-9]");
         options.addOption("t");
         options.addOption("i_");
         options.addOption("o_");
@@ -436,18 +435,18 @@ public class RubyNKF {
         options.addOption("h3", "katakana-hiragana");
         options.addOption("T");
         options.addOption("l");
-        options.addOption("f", null, true, "[0-9]+-");
+        options.addOption("f", null, "[0-9]+-");
         options.addOption("F");
-        options.addOption("Z", null, true, "[0-3]");
+        options.addOption("Z", null, "[0-3]");
         options.addOption("X");
         options.addOption("x");
-        options.addOption("B", null, true, "[0-2]");
+        options.addOption("B", null, "[0-2]");
         options.addOption("I");
-        options.addOption("L", null, true, "[uwm]");
+        options.addOption("L", null, "[uwm]");
         options.addOption("d");
         options.addOption("c");
-        options.addOption("m", null, true, "[BQN0]");
-        options.addOption("M", null, true, "[BQ]");
+        options.addOption("m", null, "[BQN0]");
+        options.addOption("M", null, "[BQ]");
         options.addOption(null, "fj");
         options.addOption(null, "unix");
         options.addOption(null, "mac");
@@ -457,8 +456,8 @@ public class RubyNKF {
         options.addOption(null, "base64");
         options.addOption(null, "mime-input");
         options.addOption(null, "base64-input");
-        options.addOption(null, "ic", true, "ic=(.*)");
-        options.addOption(null, "oc", true, "oc=(.*)");
+        options.addOption(null, "ic", "ic=(.*)");
+        options.addOption(null, "oc", "oc=(.*)");
         options.addOption(null, "fb-skip");
         options.addOption(null, "fb-html");
         options.addOption(null, "fb-xml");
