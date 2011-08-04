@@ -235,7 +235,7 @@ public class RubyNKF {
         private String opt;
         private String longOpt;
         private boolean hasArg = false;
-        private String value = "";
+        private String value = null;
         private Pattern pattern;
 
         public CmdOption(String opt, String longOpt, boolean hasArg, String pattern) {
@@ -311,7 +311,7 @@ public class RubyNKF {
             }
             return false;
         }
-        private CmdOption findShortOption(String opt) {
+        public CmdOption matchShortOption(String opt) {
             // independent of opt length
             for (Map.Entry<String , CmdOption> e : shortOpts.entrySet()) {
                 //System.out.println(opt + " = " + e.getKey());
@@ -331,16 +331,30 @@ public class RubyNKF {
             return null;
         }
         boolean hasLongOption(String opt) {
-            return longOpts.containsKey(opt);
-        }
-        CmdOption matchOption(String opt) {
-            if (hasShortOption(opt)) {
-                return findShortOption(opt);
+            for (Map.Entry<String , CmdOption> e : longOpts.entrySet()) {
+                if (opt.startsWith(e.getKey())) {
+                    return true;
+                }
             }
-            return longOpts.get(opt);
+            return false;
         }
         CmdOption matchLongOption(String opt) {
-            return longOpts.get(opt);
+            for (Map.Entry<String , CmdOption> e : longOpts.entrySet()) {
+                //System.out.println(opt + " = " + e.getKey());
+                if (opt.startsWith(e.getKey())) {
+                    //System.out.println("match[" + e.getKey() + "]");
+                    CmdOption cmd = e.getValue();
+                    if (cmd.hasArg()) {
+                        Matcher m = cmd.pattern().matcher(opt);
+                        if (m.find()) {
+                            //System.out.println("regix[" + m.group() + "]");
+                            cmd.setValue(m.group(1));
+                        }
+                    }
+                    return cmd;
+                }
+            }
+            return null;
         }
     }
     public static class CmdCommand {
@@ -383,7 +397,7 @@ public class RubyNKF {
                     int max = s.length();
                     for (int j = 0; j < max; j++) {
                         if (opt.hasShortOption(s)) {
-                            cc.addOption(opt.matchOption(s));
+                            cc.addOption(opt.matchShortOption(s));
                         }
                         s = s.substring(1);
                     }
@@ -422,16 +436,18 @@ public class RubyNKF {
         options.addOption("h3", "katakana-hiragana");
         options.addOption("T");
         options.addOption("l");
-        options.addOption("f", null, true);
+        options.addOption("f", null, true, "[0-9]+-");
         options.addOption("F");
         options.addOption("Z", null, true, "[0-3]");
         options.addOption("X");
         options.addOption("x");
         options.addOption("B", null, true, "[0-2]");
         options.addOption("I");
-        options.addOption("L", null, true);
-        options.addOption("m", null, true);
-        options.addOption("M", null, true);
+        options.addOption("L", null, true, "[uwm]");
+        options.addOption("d");
+        options.addOption("c");
+        options.addOption("m", null, true, "[BQN0]");
+        options.addOption("M", null, true, "[BQ]");
         options.addOption(null, "fj");
         options.addOption(null, "unix");
         options.addOption(null, "mac");
