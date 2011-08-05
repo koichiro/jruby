@@ -25,12 +25,16 @@ public class TestRubyNKF extends TestRubyBase {
         assertEquals("[[opt: j longOpt: jis hasArg: false pattern: null value: null], [opt: h1 longOpt: hiragana hasArg: false pattern: null value: null]]", cmd.toString());
         cmd = RubyNKF.parseOption("-Z");
         assertEquals("[[opt: Z longOpt: null hasArg: true pattern: [0-3] value: null]]", cmd.toString());
+        assertTrue(cmd.hasOption("Z"));
         cmd = RubyNKF.parseOption("-Z0");
         assertEquals("[[opt: Z longOpt: null hasArg: true pattern: [0-3] value: 0]]", cmd.toString());
         cmd = RubyNKF.parseOption("-Z1");
         assertEquals("[[opt: Z longOpt: null hasArg: true pattern: [0-3] value: 1]]", cmd.toString());
         cmd = RubyNKF.parseOption("--unix");
         assertEquals("[[opt: null longOpt: unix hasArg: false pattern: null value: null]]", cmd.toString());
+        assertTrue(cmd.hasOption("unix"));
+        cmd = RubyNKF.parseOption("-m");
+        assertEquals("[[opt: m longOpt: null hasArg: true pattern: [BQN0] value: null]]", cmd.toString());
     }
 
     public void testOptParseWithArg() throws Exception {
@@ -38,12 +42,16 @@ public class TestRubyNKF extends TestRubyBase {
         assertEquals("[[opt: L longOpt: null hasArg: true pattern: [uwm] value: null]]", cmd.toString());
         cmd = RubyNKF.parseOption("-Lu");
         assertEquals("[[opt: L longOpt: null hasArg: true pattern: [uwm] value: u]]", cmd.toString());
+        assertTrue(cmd.hasOption("L"));
         cmd = RubyNKF.parseOption("-f60-");
         assertEquals("[[opt: f longOpt: null hasArg: true pattern: [0-9]+-[0-9]* value: 60-]]", cmd.toString());
+        assertTrue(cmd.hasOption("f"));
         cmd = RubyNKF.parseOption("-f60-30");
         assertEquals("[[opt: f longOpt: null hasArg: true pattern: [0-9]+-[0-9]* value: 60-30]]", cmd.toString());
+        assertTrue(cmd.hasOption("f"));
         cmd = RubyNKF.parseOption("-mB");
         assertEquals("[[opt: m longOpt: null hasArg: true pattern: [BQN0] value: B]]", cmd.toString());
+        assertTrue(cmd.hasOption("m"));
     }
 
     public void testMultiShortOptParse() throws Exception {
@@ -54,5 +62,12 @@ public class TestRubyNKF extends TestRubyBase {
     public void testLongOptArg() throws Exception {
         RubyNKF.CmdCommand cmd = RubyNKF.parseOption("--ic=ISO-2022-JP");
         assertEquals("[[opt: null longOpt: ic hasArg: true pattern: ic=(.*) value: ISO-2022-JP]]", cmd.toString());
+        assertTrue(cmd.hasOption("ic"));
+        cmd = RubyNKF.parseOption("-w16 --oc=utf-8");
+        assertEquals("[[opt: w longOpt: null hasArg: true pattern: [0-9][0-9] value: 16], [opt: null longOpt: oc hasArg: true pattern: oc=(.*) value: utf-8]]", cmd.toString());
+        assertTrue(cmd.hasOption("w"));
+        assertEquals("16", cmd.getOptionValue("w"));
+        assertTrue(cmd.hasOption("oc"));
+        assertEquals("utf-8", cmd.getOptionValue("oc"));
     }
 }

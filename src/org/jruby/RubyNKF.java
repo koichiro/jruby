@@ -231,14 +231,14 @@ public class RubyNKF {
         return result;
     }
 
-    private static class CmdOption {
+    public static class CmdOption {
         private String opt;
         private String longOpt;
         private boolean hasArg = false;
         private String value = null;
         private Pattern pattern;
 
-        public CmdOption(String opt, String longOpt, String pattern) {
+        private CmdOption(String opt, String longOpt, String pattern) {
             this.opt = opt;
             this.longOpt = longOpt;
             if (pattern != null) {
@@ -257,7 +257,7 @@ public class RubyNKF {
         boolean hasArg() {
             return hasArg;
         }
-        String getValue() {
+        public String getValue() {
             return value;
         }
         void setValue(String v) {
@@ -359,21 +359,25 @@ public class RubyNKF {
     public static class CmdCommand {
         private final List<CmdOption> options = new ArrayList<CmdOption>();
         public boolean hasOption(String opt) {
-            return options.contains(opt);
+            for (CmdOption option : options) {
+                if (opt.equals(option.getOpt())) return true;
+                if (opt.equals(option.getLongOpt())) return true;
+            }
+            return false;
         }
         public void addOption(CmdOption opt) {
             options.add(opt);
         }
         public CmdOption getOption(String opt) {
-            return findOption(opt);
-        }
-        private CmdOption findOption(String opt) {
             for (CmdOption option : options) {
                 if (opt.equals(option.getOpt())) return option;
                 if (opt.equals(option.getLongOpt())) return option;
             }
             return null;
         }
+	public String getOptionValue(String opt) {
+	    return getOption(opt).getValue();
+	}
         public String toString() {
             return options.toString();
         }
@@ -481,20 +485,6 @@ public class RubyNKF {
         return cmd;
     }
 
-    private static int optionUTF(String s, int pos) {
-        int n = 8;
-        int first = pos + 1;
-        int second = pos + 2;
-        if (first < s.length() && Character.isDigit(s.charAt(first))) {
-            n = Character.digit(s.charAt(first), 10);
-            if (second < s.length() && Character.isDigit(s.charAt(second))) {
-                n *= 10;
-                n += Character.digit(s.charAt(second), 10);
-            }
-        }
-        return n;
-    }
-
     private static Map<String, NKFCharset> parseOpt(String s) {
         Map<String, NKFCharset> options = new HashMap<String, NKFCharset>();
 
@@ -504,123 +494,70 @@ public class RubyNKF {
         options.put("mime-decode", MIME_DETECT);
         options.put("mime-encode", NOCONV);
 
-        for (int i = 0; i < s.length(); i++) {
-            switch (s.charAt(i)) {
-            case 'b':
-                break;
-            case 'u':
-                break;
-            case 'j': // iso-2022-jp
-                options.put("output", JIS);
-                break;
-            case 's': // Shift_JIS
-                options.put("output", SJIS);
-                break;
-            case 'e': // EUC-JP
-                options.put("output", EUC);
-                break;
-            case 'w': // UTF-8
-            {
-                int n = optionUTF(s, i);
-                if (n == 32) {
-                    options.put("output", UTF32);
-                } else if (n == 16) {
-                    options.put("output", UTF16);
-                } else {
-                    options.put("output", UTF8);
-                }
-            }
-                break;
-            case 'J': // iso-2022-jp
-                options.put("input", JIS);
-                break;
-            case 'S': // Shift_JIS
-                options.put("input", SJIS);
-                break;
-            case 'E': // EUC-JP
-                options.put("input", EUC);
-                break;
-            case 'W': // UTF-8
-            {
-                int n = optionUTF(s, i);
-                if (n == 32)
-                    options.put("input", UTF32);
-                else if (n == 16)
-                    options.put("input", UTF16);
-                else
-                    options.put("input", UTF8);
-            }
-                break;
-            case 't':
-                break;
-            case 'r':
-                break;
-            case 'h':
-                break;
-            case 'm':
-                if (i+1 >= s.length()) {
-                    options.put("mime-decode", MIME_DETECT);
-                    break;
-                }
-                switch (s.charAt(i+1)) {
-                case 'B':
-                    options.put("mime-decode", BASE64);
-                    break;
-                case 'Q':
-                    options.put("mime-decode", QENCODE);
-                    break;
-                case 'N':
-                    // TODO: non-strict option
-                    break;
-                case '0':
-                    options.put("mime-decode", NOCONV);
-                    break;
-                }
-                break;
-            case 'M':
-                if (i+1 >= s.length()) {
-                    options.put("mime-encode", NOCONV);
-                }
-                switch (s.charAt(i+1)) {
-                case 'B':
-                    options.put("mime-encode", BASE64);
-                    break;
-                case 'Q':
-                    options.put("mime-encode", QENCODE);
-                    break;
-                }
-                break;
-            case 'l':
-                break;
-            case 'f':
-                break;
-            case 'F':
-                break;
-            case 'Z':
-                break;
-            case 'X':
-                break;
-            case 'x':
-                break;
-            case 'B':
-                break;
-            case 'T':
-                break;
-            case 'd':
-                break;
-            case 'c':
-                break;
-            case 'I':
-                break;
-            case 'L':
-                break;
-            case '-':
-                if (s.charAt(i+1) == '-') {
-                    // long name option
-                }
-            default:
+        CmdCommand cmd = parseOption(s);
+        if (cmd.hasOption("j")) {
+            options.put("output", JIS);
+        }
+        if (cmd.hasOption("s")) {
+            options.put("output", SJIS);
+        }
+        if (cmd.hasOption("e")) {
+            options.put("output", EUC);
+        }
+        if (cmd.hasOption("w")) {
+	    CmdOption opt = cmd.getOption("w");
+            if ("32".equals(opt.getValue())) {
+                options.put("output", UTF32);
+            } else if("16".equals(opt.getValue())) {
+                options.put("output", UTF16);
+            } else {
+                options.put("output", UTF8);
             }
         }
+        if (cmd.hasOption("J")) {
+            options.put("input", JIS);
+        }
+        if (cmd.hasOption("S")) {
+            options.put("input", SJIS);
+        }
+        if (cmd.hasOption("E")) {
+            options.put("input", EUC);
+        }
+        if (cmd.hasOption("W")) {
+	    CmdOption opt = cmd.getOption("W");
+            if ("32".equals(opt.getValue())) {
+                options.put("input", UTF32);
+            } else if("16".equals(opt.getValue())) {
+                options.put("input", UTF16);
+            } else {
+                options.put("input", UTF8);
+            }
+        }
+        if (cmd.hasOption("m")) {
+	    CmdOption opt = cmd.getOption("m");
+            if (opt.getValue() == null) {
+                options.put("mime-decode", MIME_DETECT);
+            } else if ("B".equals(opt.getValue())) {
+                options.put("mime-decode", BASE64);
+            } else if ("Q".equals(opt.getValue())) {
+                options.put("mime-decode", QENCODE);
+            } else if ("Q".equals(opt.getValue())) {
+                // TODO: non-strict option
+            } else if ("0".equals(opt.getValue())) {
+                options.put("mime-decode", NOCONV);
+            }
+        }
+        if (cmd.hasOption("M")) {
+	    CmdOption opt = cmd.getOption("M");
+            if (opt.getValue() == null) {
+                options.put("mime-encode", NOCONV);
+            } else if ("B".equals(opt.getValue())) {
+                options.put("mime-encode", BASE64);
+            } else if ("Q".equals(opt.getValue())) {
+                options.put("mime-encode", QENCODE);
+            }
+        }
+
         return options;
     }
 
