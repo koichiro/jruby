@@ -231,14 +231,14 @@ public class RubyNKF {
         return result;
     }
 
-    public static class CmdOption {
+    private static class CmdOption {
         private String opt;
         private String longOpt;
         private boolean hasArg = false;
         private String value = null;
         private Pattern pattern;
 
-        private CmdOption(String opt, String longOpt, String pattern) {
+        public CmdOption(String opt, String longOpt, String pattern) {
             this.opt = opt;
             this.longOpt = longOpt;
             if (pattern != null) {
@@ -375,9 +375,9 @@ public class RubyNKF {
             }
             return null;
         }
-	public String getOptionValue(String opt) {
-	    return getOption(opt).getValue();
-	}
+        public String getOptionValue(String opt) {
+            return getOption(opt).getValue();
+        }
         public String toString() {
             return options.toString();
         }
@@ -505,7 +505,7 @@ public class RubyNKF {
             options.put("output", EUC);
         }
         if (cmd.hasOption("w")) {
-	    CmdOption opt = cmd.getOption("w");
+            CmdOption opt = cmd.getOption("w");
             if ("32".equals(opt.getValue())) {
                 options.put("output", UTF32);
             } else if("16".equals(opt.getValue())) {
@@ -524,7 +524,7 @@ public class RubyNKF {
             options.put("input", EUC);
         }
         if (cmd.hasOption("W")) {
-	    CmdOption opt = cmd.getOption("W");
+            CmdOption opt = cmd.getOption("W");
             if ("32".equals(opt.getValue())) {
                 options.put("input", UTF32);
             } else if("16".equals(opt.getValue())) {
@@ -534,7 +534,7 @@ public class RubyNKF {
             }
         }
         if (cmd.hasOption("m")) {
-	    CmdOption opt = cmd.getOption("m");
+            CmdOption opt = cmd.getOption("m");
             if (opt.getValue() == null) {
                 options.put("mime-decode", MIME_DETECT);
             } else if ("B".equals(opt.getValue())) {
@@ -548,7 +548,7 @@ public class RubyNKF {
             }
         }
         if (cmd.hasOption("M")) {
-	    CmdOption opt = cmd.getOption("M");
+            CmdOption opt = cmd.getOption("M");
             if (opt.getValue() == null) {
                 options.put("mime-encode", NOCONV);
             } else if ("B".equals(opt.getValue())) {
