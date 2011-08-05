@@ -541,7 +541,7 @@ public class RubyNKF {
                 options.put("mime-decode", BASE64);
             } else if ("Q".equals(opt.getValue())) {
                 options.put("mime-decode", QENCODE);
-            } else if ("Q".equals(opt.getValue())) {
+            } else if ("N".equals(opt.getValue())) {
                 // TODO: non-strict option
             } else if ("0".equals(opt.getValue())) {
                 options.put("mime-decode", NOCONV);
