@@ -53,43 +53,23 @@ public class Options {
         }
         return this;
     }
-    boolean hasShortOption(String opt) {
-        for (Map.Entry<String , Option> e : shortOpts.entrySet()) {
+    private boolean hasOption(String opt, Map<String, Option> opts) {
+        for (Map.Entry<String , Option> e : opts.entrySet()) {
             if (opt.startsWith(e.getKey())) {
                 return true;
             }
         }
         return false;
     }
-    public Option matchShortOption(String opt) {
-        // independent of opt length
-        for (Map.Entry<String , Option> e : shortOpts.entrySet()) {
-            //System.out.println(opt + " = " + e.getKey());
-            if (opt.startsWith(e.getKey())) {
-                //System.out.println("match[" + e.getKey() + "]");
-                Option cmd = e.getValue();
-                if (cmd.hasArg()) {
-                    Matcher m = cmd.pattern().matcher(opt);
-                    if (m.find()) {
-                        //System.out.println("regix[" + m.group() + "]");
-                        cmd.setValue(m.group());
-                    }
-                }
-                return cmd;
-            }
-        }
-        return null;
+    boolean hasShortOption(String opt) {
+        return hasOption(opt, shortOpts);
     }
     boolean hasLongOption(String opt) {
-        for (Map.Entry<String , Option> e : longOpts.entrySet()) {
-            if (opt.startsWith(e.getKey())) {
-                return true;
-            }
-        }
-        return false;
+        return hasOption(opt, longOpts);
     }
-    Option matchLongOption(String opt) {
-        for (Map.Entry<String , Option> e : longOpts.entrySet()) {
+    private Option findOption(String opt, Map<String, Option> opts) {
+        // independent of opt length
+        for (Map.Entry<String , Option> e : opts.entrySet()) {
             //System.out.println(opt + " = " + e.getKey());
             if (opt.startsWith(e.getKey())) {
                 //System.out.println("match[" + e.getKey() + "]");
@@ -97,7 +77,7 @@ public class Options {
                 if (cmd.hasArg()) {
                     Matcher m = cmd.pattern().matcher(opt);
                     if (m.find()) {
-                        //System.out.println("regix[" + m.group() + "]");
+                        //System.out.println("regix[" + m.group(1) + "]");
                         cmd.setValue(m.group(1));
                     }
                 }
@@ -105,5 +85,11 @@ public class Options {
             }
         }
         return null;
+    }
+    Option matchShortOption(String opt) {
+        return findOption(opt, shortOpts);
+    }
+    Option matchLongOption(String opt) {
+        return findOption(opt, longOpts);
     }
 }
